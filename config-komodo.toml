@@ -106,7 +106,7 @@ network = "traefik"
 ##
 
 [[repo]]
-name = "backup-komo"
+name = "backup-koma"
 [repo.config]
 server = "Local"
 git_account = "dimasinalix"
