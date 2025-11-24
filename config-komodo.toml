@@ -197,6 +197,6 @@ params.server_id = "Local"
 [[resource_sync]]
 name = "skoolink-komodo"
 [resource_sync.config]
-linked_repo = "komodo-backup"
+linked_repo = "backup-komo"
 resource_path = ["config-komodo.toml"]
 managed = true
