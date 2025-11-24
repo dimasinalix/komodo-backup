@@ -1,1 +1,193 @@
+[[server]]
+name = "Local"
+[server.config]
+enabled = true
 
+##
+
+[[server]]
+name = "demo server"
+[server.config]
+address = "https://t.demo.skoolink.id"
+external_address = "https://t.demo.skoolink.id"
+enabled = true
+timeout_seconds = 5
+
+##
+
+[[stack]]
+name = "demo-school-1"
+[stack.config]
+server = "Local"
+git_account = "skoolink"
+repo = "skoolink/school"
+registry_provider = "git.inalix.com"
+registry_account = "dimasinalix"
+environment = """
+  # VARIABLE = value
+MODE=development
+# SKOOLINK DATA
+LOCAL_SCHOOL_NAME=DEMO SKOO
+SCHOOL_CODE=1111
+SCHOOL_DATABASE=postgres://jixit:jixitOK@postgres17:5432/db${SCHOOL_CODE}
+SCHOOL_DOMAIN=school1.skoolink.id
+SCHOOL_LEVEL=SD
+SCHOOL_ADDRESS=LAMONGAN
+SCHOOL_NAME=DEMO SCHOOL SKOOLINK
+SKOOLINK_APP_NAME=DEMO SKOOLINK
+"""
+
+##
+
+[[stack]]
+name = "demoskoo"
+[stack.config]
+server = "demo server"
+git_account = "skoolink"
+repo = "skoolink/school"
+registry_provider = "git.inalix.com"
+registry_account = "dimasinalix"
+environment = """
+  # VARIABLE = value
+MODE=development
+# SKOOLINK DATA
+LOCAL_SCHOOL_NAME=DEMO SKOO
+SCHOOL_CODE=3333
+SCHOOL_DATABASE=postgres://jixit:jixitOK@postgres17:5432/midemo
+SCHOOL_DOMAIN=demo.skoolink.id
+SCHOOL_LEVEL=SD
+SCHOOL_ADDRESS=LAMONGAN
+SCHOOL_NAME=DEMO SCHOOL SKOOLINK
+SKOOLINK_APP_NAME=DEMO SKOOLINK
+
+SECRET_KEY=afdffdfdfdfsgrgetet252454tg
+"""
+
+##
+
+[[stack]]
+name = "staging"
+[stack.config]
+server = "demo server"
+linked_repo = "school"
+environment = """
+  # VARIABLE = value
+LOCAL_SCHOOL_NAME=STAGING SCHOOL
+LOCAL_SCHOOL_LOCATION=LAMONGAN
+SCHOOL_ADDRESS=LAMONGAN
+SCHOOL_CODE=4444
+SCHOOL_DATABASE=postgres://jixit:jixitOK@postgres17:5432/mistaging
+SCHOOL_DOMAIN=staging.skoolink.id
+SCHOOL_LEVEL=SD
+SCHOOL_NAME=DEMO SCHOOL SKOOLINK
+SCHOLL_EMAIL=no-reply@skoolink.id	#PASTIKAN @skoolink.id
+SKOOLINK_APP_NAME=STAGING SCHOOL SKOOLINK
+"""
+
+##
+
+[[stack]]
+name = "traefik"
+[stack.config]
+server = "Local"
+git_account = "skoolink"
+repo = "skoolink/traefik"
+
+##
+
+[[deployment]]
+name = "how-am-i"
+[deployment.config]
+server = "demo server"
+image.type = "Image"
+image.params.image = "traefik/whoami"
+network = "traefik"
+
+##
+
+[[repo]]
+name = "komodo-backup"
+[repo.config]
+server = "Local"
+git_account = "dimasinalix"
+repo = "dimasinalix/komodo-backup"
+
+##
+
+[[repo]]
+name = "school"
+[repo.config]
+server = "Local"
+builder = "Local"
+git_account = "skoolink"
+repo = "skoolink/school"
+
+##
+
+[[repo]]
+name = "traefik"
+[repo.config]
+server = "Local"
+git_account = "skoolink"
+repo = "skoolink/traefik"
+
+##
+
+[[procedure]]
+name = "Backup Core Database"
+description = "Triggers the Core database backup at the scheduled time."
+tags = ["system"]
+config.schedule = "Every day at 01:00"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "BackupCoreDatabase", execution.params = {}, enabled = true }
+]
+
+##
+
+[[procedure]]
+name = "Global Auto Update"
+description = "Pulls and auto updates Stacks and Deployments using 'poll_for_updates' or 'auto_update'."
+tags = ["system"]
+config.schedule = "Every day at 03:00"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "GlobalAutoUpdate", execution.params = {}, enabled = true }
+]
+
+##
+
+[[procedure]]
+name = "proc-demo"
+config.webhook_secret = "mie2oang3ZohS4hahtae"
+config.schedule_timezone = "Asia/Bangkok"
+
+[[procedure.config.stage]]
+name = "Stage 1"
+enabled = true
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "demoskoo", execution.params.services = [], enabled = true }
+]
+
+##
+
+[[builder]]
+name = "Local"
+[builder.config]
+type = "Server"
+params.server_id = "Local"
+
+##
+
+[[resource_sync]]
+name = "skoolink-komodo"
+[resource_sync.config]
+linked_repo = "komodo-backup"
+resource_path = ["config-komodo.toml"]
+managed = true
