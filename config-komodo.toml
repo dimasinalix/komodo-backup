@@ -106,6 +106,15 @@ network = "traefik"
 ##
 
 [[repo]]
+name = "backup-komo"
+[repo.config]
+server = "Local"
+git_account = "dimasinalix"
+repo = "dimasinalix/komodo-backup"
+
+##
+
+[[repo]]
 name = "komodo-backup"
 [repo.config]
 server = "Local"
